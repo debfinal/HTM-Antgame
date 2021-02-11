@@ -1,0 +1,231 @@
+<html>
+    <head>
+        <script>
+            function createant(whichant)
+            {
+                var myhidden;
+                myhidden=document.createElement("input");       
+			    myhidden.type="hidden"       
+			    myhidden.name="antalive"+whichant;       
+			    myhidden.id="antalive"+whichant;       
+			    myhidden.value=1; 				
+			    document.getElementById("ants").appendChild(myhidden);
+                myhidden=document.createElement("input");       
+			    myhidden.type="hidden"       
+			    myhidden.name="antx"+whichant;       
+			    myhidden.id="antx"+whichant;       
+			    myhidden.value=Math.floor((Math.random() * 400));       
+			    document.getElementById("ants").appendChild(myhidden);
+                myhidden=document.createElement("input");
+			    myhidden.type="hidden"       
+			    myhidden.name="anty"+whichant;      
+			    myhidden.id="anty"+whichant;      
+			    myhidden.value=0;      
+			    document.getElementById("ants").appendChild(myhidden);
+                myhidden=document.createElement("img");      
+			    myhidden.src="ant0.png"       
+			    myhidden.id="ant"+whichant;      
+			    myhidden.style.height="30px";       
+			    myhidden.style.position="absolute";       
+			    myhidden.style.top=document.getElementById("anty"+whichant).value;       
+			    myhidden.style.left=document.getElementById("antx"+whichant).value;      
+			    document.getElementById("ants").appendChild(myhidden);
+                antwiggle(whichant);
+                antcrawl(whichant);
+            }
+            function antwiggle(whichant)
+            {
+                var whichimage=whichant;
+				var id=setInterval(antframe,70);
+				var whichframe=0;
+				var godown=true;
+				function antframe()
+                {
+                    var isalive=parseInt(document.getElementById("antalive"+whichimage).value);
+					if(isalive==0)
+						clearInterval(id);
+                    else if(godown)
+                    {
+						whichframe++;
+						if(whichframe==3)
+                        godown=false;
+					}
+                    else
+                    {
+						whichframe--;
+						if(whichframe==0)
+                        godown= true;
+					}
+                    if(isalive==1)
+					document.getElementById("ant"+whichimage).src="ant"+whichframe+".png";
+                }
+            }
+            function antcrawl(whichant)
+            {
+                var whichimage=whichant;
+				var id=setInterval(antframe,70);
+				var whichframe=0;
+				var godown=true;
+				function antframe()
+                {
+                    var myy=0;
+					var myx=0;
+					var isalive=parseInt(document.getElementById("antalive"+whichimage).value);
+					if(isalive==0)
+                    clearInterval(id);
+                    else
+                    {
+						myx=parseInt(document.getElementById("antx"+whichimage).value);
+						myy=parseInt(document.getElementById("anty"+whichimage).value);
+
+						if(myy>=500)
+                            godown=false;
+                        else
+                            godown=true;
+                        if(godown)
+                        {
+                            myy+=5;
+                            if(myy>=500)
+                            {
+						        godown=false;
+                                clearInterval(id);
+                                gameover();
+                            }
+                        }
+                        else
+                        {
+                            clearInterval(id);
+                            gameover();
+                        }
+						document.getElementById("anty"+whichimage).value=myy;
+						document.getElementById("ant"+whichimage).style.top=myy+"px";
+                    }
+                }
+            }	
+        
+            function gameover()
+            {
+                gameend.innerHTML="Game Over";
+				document.getElementById("ifgameover").value="0";
+                var id=setInterval(done,20);
+                function done()
+                {
+                    var font=parseInt(document.getElementById("gameend").style.fontSize);
+                    if (font<44)
+                    {
+                        font++
+                    }
+                    document.getElementById("gameend").style.fontSize=font+"px";         
+                }
+				var myaudio=document.createElement("audio");
+				var mysource=document.createElement("source");
+				mysource.src="eating.mp3";
+				myaudio.appendChild(mysource);
+				myaudio.play();
+                var mynoants = parseInt(document.getElementById("noofants").value);
+			    for(x=0; x<mynoants; x++) 
+                {
+				    document.getElementById("antalive"+x).value=0;
+			    }
+            }
+            function clickantpress(myevent)
+            {
+                antpressed(myevent.clientX, myevent.clientY);
+            }
+            function touchantpress(myevent)
+            {
+                antpressed(myevent.touches[0].clientX, myevent.touches[0].clientY);
+            }
+            function antpressed(myx, myy)
+            {
+                var x=0;
+                var pressed=false;
+                var aantx=0;
+                var aanty=0;
+                var mynoants=parseInt(document.getElementById("noofants").value);
+                while(pressed==false && x<mynoants)
+                {
+                    aantx=parseInt(document.getElementById("antx"+x).value);
+				    aanty=parseInt(document.getElementById("anty"+x).value);
+                   var antalive=parseInt(document.getElementById("antalive"+x).value);
+                    if (aantx<=myx && myx<=aantx+40 &&
+                        aanty<=myy && myy<=aanty+40 && 
+                        antalive==1)
+                        {
+							antalive=0;
+                            killant(x);
+                            pressed=true;
+                        }
+                    else
+                        x++;
+                }
+            }
+            function killant(x)
+            {
+				var myaudio=document.createElement("audio");
+				var mysource=document.createElement("source");
+				mysource.src="squish.mp3";
+				myaudio.appendChild(mysource);
+				myaudio.play();
+				document.getElementById("ant"+x).src="deadant.png";
+			    var mynoofsqants = parseInt(document.getElementById("noofsqants").value);
+			    mynoofsqants=mynoofsqants+1;
+                document.getElementById("antalive"+x).value="0";
+			    document.getElementById("noofsqants").value=mynoofsqants;
+			    score.innerHTML=document.getElementById("noofsqants").value;
+			}
+            function gamesetup()
+            {
+            score.innerHTML=document.getElementById("noofsqants").value;
+			var difficulty=1;
+			var clocktick=0;
+			var antspawner=0;
+			var mynoants=parseInt(document.getElementById("noofants").value);
+			var id=setInterval(antspawnerframe,1);
+			level.innerHTML=difficulty;
+			function antspawnerframe() 
+            {
+				clocktick=clocktick+1;
+				antspawner=antspawner+1;
+				if(parseInt(document.getElementById("ifgameover").value)==1) 
+                {
+					if((1000/difficulty)<=antspawner)
+                    {
+						createant(mynoants);
+						mynoants=mynoants+1;
+						document.getElementById("noofants").value=mynoants;
+						antspawner=0;
+					}
+					if(clocktick==1000)
+                    {
+						difficulty=difficulty+1;
+						clocktick=0;
+						antspawner=0;
+						level.innerHTML=difficulty;
+					}
+				}
+			}
+            }
+        </script>
+        <title>Ant Game</title>
+    </head>
+    <body onload="gamesetup();" onmousedown="clickantpress(event);" ontouchstart="touchantpress(event);">
+        <form name="antgame">
+            <div id="MyCanvas" style="width:400px; height:500px; position:absolute;">
+                <img id="picnictable" src="picnictable.png" style="width:200px; position: absolute; left: 0px; top: 500px;"/>
+                <img id="picnictable" src="picnictable.png" style="width:200px; position: absolute; left: 200px; top: 500px;"/>
+                <div id="ants">
+                </div>
+                <input type="hidden" name="noofants" id="noofants" value="0" />
+                <input type="hidden" name="noofsqants" id="noofsqants" value="0" />
+                <input type="hidden" name="ifgameover" id="ifgameover" value="1" />
+            </div>  
+            <p id="scoreboard " style="position: absolute; left: 500px; top: 0px">Ants Killed:
+            <span id="score"></span></p>
+            <p id="levelno" style="position: absolute; left: 500px; top: 25px">Level:
+                <span id="level"></span></p>
+            <p id="gameend" style="position: absolute; top: 100px; left: 200px; color: red; font-size: 14px;"></p>
+            
+        </form>
+    </body>
+</html>
